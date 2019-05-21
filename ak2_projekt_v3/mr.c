@@ -1,23 +1,57 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 unsigned long rozmiarTablicy = 5;
 unsigned int rozmiarStringa = 600;
 
+extern _Bool modulo2(unsigned long * liczba);
+extern _Bool czyArg1WiekszyOdArg2(unsigned long* arg1, unsigned long* arg2,unsigned long  rozmiarTablicy);
+extern _Bool czyArg1RownyArg2(unsigned long*arg1, unsigned long* arg2, unsigned long rozmiarTablicy);
 extern void wczytajLiczbeSzestnastkowo(char *napis, unsigned long* liczba, unsigned long rozmiar);
 extern void dziel(unsigned long* dzielna, unsigned long* dzielnik, 
 		unsigned long* reszta_z_dzielenia, unsigned long rozmiar, unsigned long* wynik);
 extern void dodaj(unsigned long * arg1, unsigned long * arg2, unsigned long * wynik, unsigned long rozmiar);
 extern void przesunBityWLewo(unsigned long *arg1, unsigned long rozmiar);
+extern void przesunBityWPrawo(unsigned long *arg, unsigned long rozmiar);
 extern void odejmij(unsigned long *arg1, unsigned long *arg2, unsigned long * wynik, unsigned long rozmiar);
 extern void mnoz(unsigned long *arg1, unsigned long *arg2, unsigned long rozmiar, unsigned long * wynik); 
 extern void kopiujArg1DoArg2(unsigned long *arg1, unsigned long *arg2,unsigned long rozmiar);
 void potegowanieModulo(unsigned long *a, unsigned long *b, unsigned long *n, unsigned long *w);
 void wyzerujTablice(unsigned long *tab, unsigned long rozmiar);  
 void wyzerujNapis(char *napis);
+void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* liczbaDoWylosowania,  unsigned long rozmiar);
+unsigned long obliczWielkoscTablicy(char* napis);
+_Bool testMR(unsigned long * n, unsigned int p);
 int main() {
-    
-    unsigned long a[rozmiarTablicy];
+	srand(time(NULL));
+    	char napis[600];
+	unsigned int p=100;
+	printf("Prosze podac liczbe ,ktora ma byc przetestowana.\n Liczbe prosze podac w systestemie o podstawie 16.\n Liczby od A do F prosze wpisywac z wielkich liter.\n");
+	fgets(napis,600,stdin);
+	rozmiarTablicy=obliczWielkoscTablicy(napis);
+	unsigned long n[rozmiarTablicy];
+	wyzerujTablice(n,rozmiarTablicy);
+	wczytajLiczbeSzestnastkowo(napis,n,rozmiarTablicy);
+	unsigned long dwa[rozmiarTablicy];
+	wyzerujTablice(dwa,rozmiarTablicy);
+	dwa[0]=2;
+	unsigned long a[rozmiarTablicy];
+	wylosujOdDwaDoNMinusTrzy(n,a,rozmiarTablicy);
+	if(czyArg1WiekszyOdArg2(dwa,n,rozmiarTablicy))
+		printf("NIE\n");
+	else if(czyArg1RownyArg2(dwa,n,rozmiarTablicy))
+		printf("TAK\n");
+	else if(modulo2(n)==0)
+		printf("NIE\n");
+	else
+	{
+		if(testMR(n,p)==1)
+			printf("TAK\n");
+		else printf("NIE\n");
+	}
+	getchar();
+   /* unsigned long a[rozmiarTablicy];
     unsigned long b[rozmiarTablicy];
     unsigned long n[rozmiarTablicy];
     unsigned long w[rozmiarTablicy];
@@ -37,12 +71,13 @@ int main() {
     potegowanieModulo(a,b,n,w);    
      //for(int i=0;i<rozmiarTablicy;i++)
 //	    printf("%ld\n",w[i]);
+*/
 }
 
 void potegowanieModulo(unsigned long *a, unsigned long *b, unsigned long *n,unsigned long *w)
 {
 	unsigned long r[rozmiarTablicy];  // reszta
-	wyzerujTablice(r,rozmiarTablicy);
+	//wyzerujTablice(r,rozmiarTablicy);
 	kopiujArg1DoArg2(a,r,rozmiarTablicy); //r=a
 	wyzerujTablice(w,rozmiarTablicy); // w=0
 	w[0]=1;				   // wynik = 1 
@@ -86,7 +121,7 @@ void potegowanieModulo(unsigned long *a, unsigned long *b, unsigned long *n,unsi
 }
 void wyzerujTablice(unsigned long *tab, unsigned long rozmiar)
 {
-	for (int i=0; i<rozmiar;i++)
+	for (unsigned long i=0; i<rozmiar;i++)
 		tab[i]=0;
 }
 void wyzerujNapis(char* napis)
@@ -94,6 +129,108 @@ void wyzerujNapis(char* napis)
 	for(int i=0;i<rozmiarStringa;i++)
 		napis[i]=0;
 }
+_Bool testMR(unsigned long * n, unsigned int p)
+{
+	char liczbaZlozona;
+	unsigned long s[rozmiarTablicy];
+        unsigned long d[rozmiarTablicy];
+        unsigned long a[rozmiarTablicy];
+	unsigned long r[rozmiarTablicy];
+	wyzerujTablice(s,rozmiarTablicy);     //s=0
+	 kopiujArg1DoArg2(n,d,rozmiarTablicy); // d=n
+	unsigned long jeden[rozmiarTablicy];  
+	wyzerujTablice(jeden,rozmiarTablicy); 
+	jeden[0]=1;
+	odejmij(d,jeden,d,rozmiarTablicy);  //d=d-1
+
+	while(1)
+	{
+		if(modulo2==0)
+		{
+			przesunBityWPrawo(d,rozmiarTablicy); // d=d/2
+			dodaj(s,jeden,s,rozmiarTablicy); // s++
+		}else
+			break;
+	}
+unsigned long _w[rozmiarTablicy];
+unsigned long _d[rozmiarTablicy];
+unsigned long nMinus1[rozmiarTablicy];
+kopiujArg1DoArg2(n,nMinus1,rozmiarTablicy);
+odejmij(nMinus1,jeden,nMinus1,rozmiarTablicy);
+for(int i=0;i<p;i++) // ilosc testow
+{
+		//a=rand() % (n-2) +2
+		//
+	potegowanieModulo(a,d,n,_w);
+	if(!czyArg1RownyArg2(_w,jeden,rozmiarTablicy))
+	{
+		liczbaZlozona=0;
+		kopiujArg1DoArg2(d,_d,rozmiarTablicy);
+		wyzerujTablice(r,rozmiarTablicy);
+		potegowanieModulo(a,_d,n,_w);
+		if(czyArg1RownyArg2(_w,nMinus1,rozmiarTablicy))
+		{
+			liczbaZlozona=1;
+			break;
+		}
+		dodaj(r,jeden,r,rozmiarTablicy); 
+		// dla r >0
+		while(czyArg1WiekszyOdArg2(s,r,rozmiarTablicy)) //dopoki r<s
+		{
+			przesunBityWLewo(_d,rozmiarTablicy);
+			potegowanieModulo(a,_d,n,_w);
+			if(czyArg1RownyArg2(_w,nMinus1,rozmiarTablicy))
+			{
+				liczbaZlozona=1;
+				break;
+			}
+
+			dodaj(r,jeden,r,rozmiarTablicy); // r++
+		}
+		if(liczbaZlozona!=1)
+			return 0;
+	}		
+}
+return 1;	
 
 
 
+
+}
+
+
+unsigned long obliczWielkoscTablicy(char* napis)
+{
+	int i=0;
+	while(napis[i]!='\n')
+		i++;
+	i=i/4;
+	i++;
+	return i;
+}
+
+void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* liczbaDoWylosowania, unsigned long rozmiar) {
+    unsigned long resztaZDzielenia[rozmiar];
+    unsigned long piec[rozmiar];
+    unsigned long wynikOdejmowania[rozmiar];
+    unsigned long wynikDzielenia[rozmiar];
+    unsigned long trzy[rozmiar];
+    wyzerujTablice(liczbaDoWylosowania, rozmiar);
+    wyzerujTablice(resztaZDzielenia, rozmiar);
+    wyzerujTablice(piec, rozmiar);
+    wyzerujTablice(wynikOdejmowania, rozmiar);
+    wyzerujTablice(wynikDzielenia, rozmiar);
+    wyzerujTablice(trzy, rozmiar);
+ 
+    piec[0] = 5;
+    trzy[0] = 3;
+ 
+    int i;
+    for (i = 0; i<rozmiar; i++) {
+        liczbaDoWylosowania[i] = rand() + 1;
+    }
+    odejmij(liczba, piec, wynikOdejmowania, rozmiar);
+    dziel(liczbaDoWylosowania, wynikOdejmowania, resztaZDzielenia, rozmiar, wynikDzielenia);
+    dodaj(liczbaDoWylosowania, trzy, liczbaDoWylosowania, rozmiar);
+ 
+}

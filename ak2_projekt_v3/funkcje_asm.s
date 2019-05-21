@@ -18,6 +18,9 @@ dzieleniePrzezZero_dlugosc = . - dzieleniePrzezZero
 .global mnoz
 .global dziel
 .global wczytajLiczbeSzestnastkowo
+.global modulo2
+.global czyArg1WiekszyOdArg2
+.global czyArg1RownyArg2
 .text
 
 #argumenty (adres stringa, adres liczby, rozmair liczby)
@@ -84,7 +87,6 @@ wczytajLiczbeSzestnastkowo:
 porownaj2Liczby:
     pushl %ebp
     movl %esp, %ebp
-    subl $12, %esp
     pushl %edx
     pushl %edi
     pushl %ecx
@@ -140,7 +142,6 @@ kopiujArg1DoArg2:
 przesunBityWLewo:
     pushl %ebp
     movl %esp, %ebp
-    subl $8, %esp
     pushl %edi
     pushl %ecx
     movl 8(%ebp), %edi
@@ -166,7 +167,6 @@ ret
 przesunBityWPrawo:
     pushl %ebp
     movl %esp, %ebp
-    subl $8, %esp
     pushl %edi
     pushl %ecx
     movl 8(%ebp), %edi  #adres argumentu
@@ -456,3 +456,80 @@ popl %ebx
 movl %ebp ,%esp
 popl %ebp
 ret
+.type modulo2, @function
+modulo2:
+	pushl %ebp
+	movl %esp,%ebp
+	movl 8(%ebp), %edi
+	movl (%edi), %eax
+	andl $1, %eax
+	movl %ebp, %esp
+	popl %ebp
+	ret
+# adres 1 liczby, adres 2 liczby, rozmiar argumentow
+#funckja zwraca 1 jezeli pierwsza liczba wieksza, 0 w przeciwnym razie 
+.type czyArg1WiekszyOdArg2, @function
+czyArg1WiekszyOdArg2:
+    pushl %ebp
+    movl %esp, %ebp  
+    pushl %edx
+    pushl %edi
+    pushl %ecx
+    movl 8(%ebp), %edx  #adres 1 liczby
+    movl 12(%ebp), %edi #adres 2 liczby
+    movl 16(%ebp), %ecx #rozmiar argumentow
+    decl %ecx      
+    __sprawdzaj_wszystkie:
+    cmpl $0, %ecx  
+    jl __koniec_sprawdzaj_wszystkie
+    movl (%edx,%ecx,4), %eax
+    cmpl (%edi,%ecx,4), %eax
+    ja __pierwsza_wieksza
+    jb __koniec_sprawdzaj_wszystkie
+    decl %ecx
+    jmp __sprawdzaj_wszystkie
+    __koniec_sprawdzaj_wszystkie:
+    movl $0, %eax           
+    jmp __koniec_porownywania
+    __pierwsza_wieksza:
+    movl $1, %eax           #zwraca 1 gdy pierwsza wieksza
+    __koniec_porownywania:
+    popl %ecx
+    popl %edi
+    popl %edx
+    movl %ebp, %esp
+    popl %ebp
+ret
+.type czyArg1RownyArg2, @function
+czyArg1RownyArg2:
+    pushl %ebp
+    movl %esp, %ebp  
+    pushl %edx
+    pushl %edi
+    pushl %ecx
+    movl 8(%ebp), %edx  #adres 1 liczby
+    movl 12(%ebp), %edi #adres 2 liczby
+    movl 16(%ebp), %ecx #rozmiar argumentow 
+    decl %ecx      
+    _sprawdzaj_wszystkie:
+    cmpl $0, %ecx  
+    jl _koniec_sprawdzaj_wszystkie
+    movl (%edx,%ecx,4), %eax
+    cmpl (%edi,%ecx,4), %eax
+    jne nie_rowne
+    decl %ecx
+    jmp _sprawdzaj_wszystkie
+    _koniec_sprawdzaj_wszystkie:
+    movl $1, %eax           
+    jmp _koniec_porownywania
+    nie_rowne:
+    movl $0, %eax           #zwraca 1 gdy pierwsza wieksza
+    _koniec_porownywania:
+    popl %ecx
+    popl %edi
+    popl %edx
+    movl %ebp, %esp
+    popl %ebp
+ret
+
+
