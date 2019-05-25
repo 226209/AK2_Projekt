@@ -24,7 +24,6 @@ dzieleniePrzezZero_dlugosc = . - dzieleniePrzezZero
 .text
 
 #argumenty (adres stringa, adres liczby, rozmair liczby)
-#zmienne lokalne dlugosc stringa
 .type wczytajLiczbeSzestnastkowo, @function
 wczytajLiczbeSzestnastkowo:
 	pushl %ebp
@@ -33,11 +32,11 @@ wczytajLiczbeSzestnastkowo:
 	pushl %edi
 	pushl %eax
 	pushl %edx
-	movl $0, %ecx	#licznik=0
+	movl $0, %ecx	
 	oblicz_dlugosc:
 		movl 8(%ebp), %edi		#adres lancucha znakow
-		movb (%edi,%ecx,1), %al		#pobierz znak
-		cmpb $10, %al 			 #sprawdz czy koniec ciagu
+		movb (%edi,%ecx,1), %al		
+		cmpb $10, %al 			
 		je koniec_oblicz_dlugosc	 
 			cmpb $65, %al	
 			jae litera
@@ -48,7 +47,7 @@ wczytajLiczbeSzestnastkowo:
 			koniec_sprawdzania:
 			##przsuwanie bitow
 			pushl %ecx
-			movl $4, %edx 	#licznik petli
+			movl $4, %edx 	
 			wykonuj4Razy:
 			movl 12(%ebp), %edi 	#adres liczby 
 			cmpl $0, %edx		
@@ -59,7 +58,7 @@ wczytajLiczbeSzestnastkowo:
 			pushf			#zachowaj przeniesienie
 			cmpl 16(%ebp), %ecx
 			je koniecPrzesunWszystkieBityWlewo
-			popf		#pobierz flage cf
+			popf		
 			rcll $1, (%edi,%ecx,4)	
 			incl %ecx
 			jmp przesunWszystkieBityWlewo
@@ -68,7 +67,7 @@ wczytajLiczbeSzestnastkowo:
 			decl %edx
 			jmp wykonuj4Razy
 			koniecWykonuj4Razy:
-			#koniec
+			#koniec przesuwania bitow
 			popl %ecx
 			movl 12(%ebp), %edi		#adres liczby
 			addb %al, (%edi)		#dodaj do liczby
@@ -81,7 +80,6 @@ wczytajLiczbeSzestnastkowo:
 	movl %ebp, %esp
 	popl %ebp
 	ret
-# adres stringa, adres liczby, rozmair liczby
 #(adres 1 liczby, adres 2 liczby, rozmiar argumentow)
 .type porownaj2Liczby, @function
 porownaj2Liczby:
@@ -123,6 +121,10 @@ porownaj2Liczby:
 kopiujArg1DoArg2:
     pushl %ebp
     movl %esp, %ebp
+    pushl %edi
+    pushl %edx
+    pushl %ecx
+    pushl %eax
     movl 8(%ebp), %edi #arg1
     movl 12(%ebp), %edx #arg2
     movl $0, %ecx
@@ -134,6 +136,10 @@ kopiujArg1DoArg2:
     incl %ecx
     jmp kopiuj
     koniec_kopiowania:
+    popl %eax
+    popl %ecx
+    popl %edx
+    popl %edi
     movl %ebp, %esp
     popl %ebp
     ret
@@ -144,14 +150,14 @@ przesunBityWLewo:
     movl %esp, %ebp
     pushl %edi
     pushl %ecx
-    movl 8(%ebp), %edi
+    movl 8(%ebp), %edi #adres argumentu
     movl $1, %ecx
     shll $1, (%edi)
     przesunWLewo:
     pushf           #zachowaj przeniesienie
     cmpl 12(%ebp), %ecx
     je koniecPrzesunWLewo
-    popf        #pobierz flage cf
+    popf        
     rcll $1, (%edi,%ecx,4) 
     incl %ecx
     jmp przesunWLewo
@@ -178,7 +184,7 @@ przesunBityWPrawo:
     pushf           #zachowaj przeniesienie
     cmpl $0, %ecx
     jl koniecPrzesunWPrawo
-    popf        #pobierz flage cf
+    popf        
     rcrl $1, (%edi,%ecx,4) 
     decl %ecx
     jmp przesunWPrawo
@@ -197,13 +203,13 @@ ret
 dodaj:
     pushl %ebp
     movl %esp, %ebp
-    movl 8(%ebp), %edx      #wpisz adres arg1
-    movl (%edx), %eax   #wpisz wartosc z pod arg1
-    movl 12(%ebp), %edx #wpisz adres arg2
-    addl (%edx), %eax   #dodaj arg2 od arg1
-    movl 16(%ebp), %edx #wpisz adres wyniku
+    movl 8(%ebp), %edx      # adres arg1
+    movl (%edx), %eax   
+    movl 12(%ebp), %edx     #adres arg2
+    addl (%edx), %eax   
+    movl 16(%ebp), %edx     #adres wyniku
     movl %eax, (%edx)   #wpisz wartosc dodawania do wyniku
-    movl $1, %ecx       #licznik 1
+    movl $1, %ecx       
     dodaj_:
     pushf           #zachowaj flagi
     cmpl 20(%ebp), %ecx #dopoki rozne od dlugosci argumentow
@@ -215,7 +221,7 @@ dodaj:
     adcl (%edx,%ecx,4), %eax #dodaj arg2 do arg1
     movl 16(%ebp), %edx #wez adres wyniku
     movl %eax, (%edx,%ecx,4)
-    incl %ecx        #zwieksz licznik
+    incl %ecx        
     jmp dodaj_
     koniec_dodaj:
     popf
@@ -230,25 +236,25 @@ dodaj:
 odejmij:
     pushl %ebp
     movl %esp, %ebp
-    movl 8(%ebp), %edx      #wpisz adres arg1
-    movl (%edx), %eax   #wpisz wartosc z pod arg1
-    movl 12(%ebp), %edx #wpisz adres arg2
-    subl (%edx), %eax   #odejmij arg2 od arg1
-    movl 16(%ebp), %edx #wpisz adres wyniku
-    movl %eax, (%edx)   #wpisz wartosc odejmowania do wyniku
-    movl $1, %ecx       #licznik 1
+    movl 8(%ebp), %edx      # adres arg1
+    movl (%edx), %eax   
+    movl 12(%ebp), %edx     #adres arg2
+    subl (%edx), %eax   
+    movl 16(%ebp), %edx     #adres wyniku
+    movl %eax, (%edx)   
+    movl $1, %ecx       
     odejmij_:  
     pushf           
     cmpl 20(%ebp), %ecx #dopoki rozne od dlugosci argumentow
     je koniec_odejmij
-    popf             #pobierz flagi ze stosu
-    movl 8(%ebp), %edx   #wez adres arg1
+    popf             
+    movl 8(%ebp), %edx   #adres arg1
     movl (%edx,%ecx,4), %eax #wez i-ty wyraz arg1
-    movl 12(%ebp), %edx  #wez adres arg2
+    movl 12(%ebp), %edx  #adres arg2
     sbbl (%edx,%ecx,4), %eax #wez i-ty wyraz arg2
-    movl 16(%ebp), %edx  #wez adres wyniku
+    movl 16(%ebp), %edx  #adres wyniku
     movl %eax, (%edx,%ecx,4) #wpisz wartosc do i-tego elementu wyniku
-    incl %ecx        #zwieksz licznik
+    incl %ecx        
     jmp odejmij_
     koniec_odejmij:
     popf
@@ -256,36 +262,34 @@ odejmij:
     popl %ebp
     ret
  
+#argumenty (adres mnoznej, adres mnoznika, rozmiar arg, adr wynik (size*2)
+#ecx - licznik petli wewnetrznej
+#ebx - licznik petli zewnetrznej
 .type mnoz, @function
 mnoz:
-    #argumenty (adres mnoznej, adres mnoznika, rozmiar arg, adr wynik (size*2)
-    #ecx - licznik petli wewnetrznej
-    #ebx - licznik petli zewnetrznej
     pushl %ebp
     movl %esp, %ebp
     pushl %ebx
     pushl %edi
     movl $0, %ebx
     petla_zewnetrzna:
-    cmpl 16(%ebp), %ebx # sprawdz warunek
+    cmpl 16(%ebp), %ebx 
     je koniec_petla_zewnetrzna
         #---------------------------petla wewnetrzna-------------------
         movl $0, %ecx # wyzerowanie licznika petli wewnetrznej
         petla_wewnetrzna:
-        cmpl 16(%ebp), %ecx # sprawdzenie warunku petli
+        cmpl 16(%ebp), %ecx 
         je koniec_petla_wewnetrzna
         movl 8(%ebp), %edi      # adres mnoznej
         movl (%edi,%ecx,4), %eax # 4 bajty mnoznej do eax
-        xor %edx, %edx          #wyzerowanie edx
+        xor %edx, %edx          
         movl 12(%ebp), %edi      #adres mnoznika
-        mull (%edi,%ebx,4) # 4 bajty mnoznika do ebx
-        # eax mlodsza czesc , edx starsza
-        pushl %ecx # zachowaj licznik petli
-        # dodaj do wyniku
+        mull (%edi,%ebx,4) 	# 4 bajty mnoznika do ebx
+        pushl %ecx 		# zachowaj licznik petli
         movl 20(%ebp), %edi     #adres wyniku
         addl %ebx, %ecx         #ustaw wage w ecx ecx=ecx+ebx
         addl %eax, (%edi,%ecx,4)
-        incl %ecx               #kolejna waga
+        incl %ecx               
         adcl %edx, (%edi,%ecx,4)
         #dodaj przeniesienie jezeli wystapilo
     dodawaj_przeniesienie:
@@ -308,10 +312,9 @@ mnoz:
     popl %ebp
     ret
    
-#(dzielna, dzielnik,reszta_z_dzielenia, rozmiar)
+#(adres dzielnej,adres dzielnika,adres reszty_z_dzielenia, rozmiar,adres wyniku)
 .type dziel, @function
 dziel:
-      #arg1- dzielna, arg2- dzielnik, reszta_z_dzielenia,rozmiar, adr wyniku
 pushl %ebp
 movl %esp, %ebp
 pushl %ebx
@@ -363,8 +366,7 @@ pushl %edi
     addl $8, %esp
     incl %ecx
     jmp przeskaluj_maksymalnie_dzielnik
-    #------
-    #skalowanie dzielnej:
+    #skalowanie dzielnika:
     #(adres 1 liczby, adres 2 liczby, rozmiar argumentow)
     skalowanie:
     pushl 20(%ebp) #rozmiar argumentow
@@ -383,30 +385,30 @@ pushl %edi
     jmp skalowanie
     koniec_skalowania:
     #Dzielna przeskalowana
-    #sprawdz i odejmij     ##########do tad dziala
+    #sprawdz i odejmij   
     odejmuj_kolejne:
-    cmpl $0, %ecx       #tyle samo sprawdzen co skalowac w lewo
+    cmpl $0, %ecx       #tyle samo sprawdzen co skalowan w lewo
     je koniec_odejmuj_kolejne
     #sprawdz czy mniejsze jezeli tak odejmij jezeli nie skaluj w prawo dzielnik
     #wynik przesun w lewo
     pushl 20(%ebp)  #rozmiar
-    pushl 24(%ebp)  #wynik dzielenia ###############
+    pushl 24(%ebp)  #wynik dzielenia 
     call przesunBityWLewo  
     addl $8, %esp
     pushl 20(%ebp) #rozmiar argumentow
     pushl 12(%ebp)  #dzielnik
-    pushl 16(%ebp) #reszta_z_dzielenia      #BLAD !!!!!!!!!!!!!!!!!---------
+    pushl 16(%ebp) #reszta_z_dzielenia      
 call porownaj2Liczby#eax=0 rowne, eax=1 pierwsza wieksza, eax=2 druga wieksza
     addl $12, %esp
     cmpl $2, %eax
-    je wiekszy#wiekszy dzielnik
+    je wiekszy	#wiekszy dzielnik
     #dzielnik mniejszy -> odejmij,wynik+1, przeskaluj
     pushl %ecx  #odejmowanie wykorzystuje ecx
     pushl 20(%ebp)  #rozmiar argumentow
     pushl 16(%ebp)  #adres wyniku
     pushl 12(%ebp)  #adres 2 arg
     pushl 16(%ebp)  #adres 1 arg
-    call odejmij    #arg1-arg2      #modyfikuje rejestry
+    call odejmij   
     addl $16, %esp
     popl %ecx
     movl 24(%ebp), %edi
@@ -456,6 +458,7 @@ popl %ebx
 movl %ebp ,%esp
 popl %ebp
 ret
+#adres argumentu
 .type modulo2, @function
 modulo2:
 	pushl %ebp

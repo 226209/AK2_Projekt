@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 
 unsigned long rozmiarTablicy = 5;
 unsigned int rozmiarStringa = 600;
@@ -20,13 +21,20 @@ extern void kopiujArg1DoArg2(unsigned long *arg1, unsigned long *arg2,unsigned l
 void potegowanieModulo(unsigned long *a, unsigned long *b, unsigned long *n, unsigned long *w);
 void wyzerujTablice(unsigned long *tab, unsigned long rozmiar);  
 void wyzerujNapis(char *napis);
-void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* liczbaDoWylosowania,  unsigned long rozmiar);
+void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* resztaZDzielenia, unsigned long rozmiar);
 unsigned long obliczWielkoscTablicy(char* napis);
+_Bool testPoprawnosci(unsigned long p);
 _Bool testMR(unsigned long * n, unsigned int p);
+void czasPotegowania(int ilosc);
+void czasTestuMR(unsigned int p);
 int main() {
-	srand(time(NULL));
-    	char napis[600];
-	unsigned int p=100;
+	testPoprawnosci(10);
+	//_Bool x=testPoprawnosci(100);
+//	if(x==1)
+//		printf("Program dziala prawidlowo\n");
+//	else printf("Program nie dziala prawidlowo\n");
+    	/*char napis[600];
+	unsigned int p=10;
 	printf("Prosze podac liczbe ,ktora ma byc przetestowana.\n Liczbe prosze podac w systestemie o podstawie 16.\n Liczby od A do F prosze wpisywac z wielkich liter.\n");
 	fgets(napis,600,stdin);
 	rozmiarTablicy=obliczWielkoscTablicy(napis);
@@ -160,7 +168,9 @@ odejmij(nMinus1,jeden,nMinus1,rozmiarTablicy);
 for(int i=0;i<p;i++) // ilosc testow
 {
 		//a=rand() % (n-2) +2
-		//
+		
+		wylosujOdDwaDoNMinusTrzy(n,a,rozmiarTablicy);
+	
 	potegowanieModulo(a,d,n,_w);
 	if(!czyArg1RownyArg2(_w,jeden,rozmiarTablicy))
 	{
@@ -209,28 +219,130 @@ unsigned long obliczWielkoscTablicy(char* napis)
 	return i;
 }
 
-void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* liczbaDoWylosowania, unsigned long rozmiar) {
-    unsigned long resztaZDzielenia[rozmiar];
-    unsigned long piec[rozmiar];
-    unsigned long wynikOdejmowania[rozmiar];
+void wylosujOdDwaDoNMinusTrzy(unsigned long* liczba, unsigned long* resztaZDzielenia, unsigned long rozmiar) {
+    unsigned long liczbaDoWylosowania[rozmiar];
+    unsigned long kopiaLiczby[rozmiar];
     unsigned long wynikDzielenia[rozmiar];
     unsigned long trzy[rozmiar];
+    unsigned long piec[rozmiar];
+    unsigned long dwa[rozmiar];
+    unsigned long jeden[rozmiar];
+    wyzerujTablice(jeden, rozmiar);
+    wyzerujTablice(dwa, rozmiar);
+    wyzerujTablice(piec, rozmiar);
+    wyzerujTablice(trzy, rozmiar);
     wyzerujTablice(liczbaDoWylosowania, rozmiar);
     wyzerujTablice(resztaZDzielenia, rozmiar);
-    wyzerujTablice(piec, rozmiar);
-    wyzerujTablice(wynikOdejmowania, rozmiar);
+    wyzerujTablice(kopiaLiczby, rozmiar);
     wyzerujTablice(wynikDzielenia, rozmiar);
-    wyzerujTablice(trzy, rozmiar);
  
-    piec[0] = 5;
     trzy[0] = 3;
+    piec[0] = 5;
+    dwa[0] = 2;
+    jeden[0] = 1;
  
     int i;
     for (i = 0; i<rozmiar; i++) {
-        liczbaDoWylosowania[i] = rand() + 1;
+        liczbaDoWylosowania[i] = rand() + 2;
     }
-    odejmij(liczba, piec, wynikOdejmowania, rozmiar);
-    dziel(liczbaDoWylosowania, wynikOdejmowania, resztaZDzielenia, rozmiar, wynikDzielenia);
-    dodaj(liczbaDoWylosowania, trzy, liczbaDoWylosowania, rozmiar);
  
+    kopiujArg1DoArg2(liczba,kopiaLiczby,rozmiar);
+    dziel(liczbaDoWylosowania, kopiaLiczby, resztaZDzielenia, rozmiar, wynikDzielenia);
+    if (czyArg1WiekszyOdArg2(dwa, resztaZDzielenia, rozmiar))
+        resztaZDzielenia[0] = 2;
+}
+
+_Bool testPoprawnosci(unsigned long p)
+{
+	FILE *plik =fopen("liczbyhex","r");
+	if(plik==NULL)
+		printf("Nie udalo sie otworzyc pliku\n");
+	else
+	{
+		char string[600];
+		while(feof(plik)==0)
+		{
+		fgets(string,600,plik);
+		rozmiarTablicy=obliczWielkoscTablicy(string);
+		unsigned long n[rozmiarTablicy];
+		wyzerujTablice(n,rozmiarTablicy);
+		wczytajLiczbeSzestnastkowo(string,n,rozmiarTablicy);
+			if(testMR(n,p)==0)
+			{
+				fclose(plik);
+				return 0;
+			}
+
+		}
+		fclose(plik);
+		return 1;
+	}
+	return 0;
+}
+
+void czasPotegowania(int ilosc)
+{
+	FILE *plik;
+	plik = fopen("/home/sebastian/AK2_Projekt/ak2_projekt_v3/czasPotegowania","w");
+	clock_t start,end;
+	double cpu_time_used;
+	for(int i=1;i<=ilosc;i++)
+	{
+		rozmiarTablicy=i;
+		unsigned long a[rozmiarTablicy];
+		unsigned long b[rozmiarTablicy];
+		unsigned long n[rozmiarTablicy];
+		unsigned long w[rozmiarTablicy];
+		wyzerujTablice(w,rozmiarTablicy);
+		for(int i=0;i<rozmiarTablicy;i++)
+		{
+			a[i]=rand() %ULONG_MAX;
+			b[i]=rand() %ULONG_MAX;
+			n[i]=rand() %ULONG_MAX;
+		}
+
+		start=clock();
+		potegowanieModulo(a,b,n,w);
+		end=clock();
+		cpu_time_used = ((double)(end-start))/CLOCKS_PER_SEC;
+		fprintf(plik,"%f\n",cpu_time_used);
+
+	}
+	fclose(plik);
+
+
+}
+
+void czasTestuMR(unsigned int p)
+{
+	FILE *plikCzas;
+	plikCzas = fopen("/home/sebastian/AK2_Projekt/ak2_projekt_v3/czasTestuMR","w");
+	clock_t start,end;
+	double cpu_time_used;
+	FILE *plik =fopen("liczbyCzasTestuMR","r");
+	if(plik==NULL)
+		printf("Nie udalo sie otworzyc pliku\n");
+	else
+	{
+
+		char string[600];
+		while(feof(plik)==0)
+		{
+		fgets(string,600,plik);
+		rozmiarTablicy=obliczWielkoscTablicy(string);
+		unsigned long n[rozmiarTablicy];
+		wyzerujTablice(n,rozmiarTablicy);
+		wczytajLiczbeSzestnastkowo(string,n,rozmiarTablicy);
+			start=clock();
+			testMR(n,p);
+			end=clock();
+			cpu_time_used = ((double)(end-start))/CLOCKS_PER_SEC;
+			fprintf(plikCzas,"%f %ld\n",cpu_time_used,rozmiarTablicy);
+		}
+		fclose(plik);
+	}
+
+	fclose(plik);
+
+
 }
