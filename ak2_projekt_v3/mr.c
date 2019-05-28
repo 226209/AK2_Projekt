@@ -30,13 +30,14 @@ void czasPotegowania(int ilosc);
 void czasTestuMR(unsigned int p);
 void czyPierwsza(unsigned int p);
 int main() {
-	czyPierwsza(1);
+	srand(time(NULL));
+	//czyPierwsza(1);
 	/*_Bool x=testPoprawnosci(10);
 	if(x==1)
 		printf("Program dziala prawidlowo\n");
 	else printf("Program nie dziala prawidlowo\n");
     	}*/
-	//czasTestuMR(1);
+	czasTestuMR(20);
 	//czasPotegowania(65);
 	}
 
@@ -220,9 +221,8 @@ _Bool testPoprawnosci(unsigned long p)
 	else
 	{
 		char string[600];
-		while(feof(plik)==0)
+		while(fgets(string,600,plik)!=NULL)
 		{
-		fgets(string,600,plik);
 		rozmiarTablicy=obliczWielkoscTablicy(string);
 		unsigned long n[rozmiarTablicy];
 		wyzerujTablice(n,rozmiarTablicy);
@@ -288,9 +288,9 @@ void czasTestuMR(unsigned int p)
 	{
 
 		char string[600];
-		while(feof(plik)==0)
+		while(fgets(string,600,plik)!=NULL)
 		{
-		fgets(string,600,plik);
+		
 		rozmiarTablicy=obliczWielkoscTablicy(string);
 		unsigned long n[rozmiarTablicy];
 		wyzerujTablice(n,rozmiarTablicy);
